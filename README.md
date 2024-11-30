@@ -13,6 +13,7 @@ Mount your raws in `/in` and the pdfs will go into `/out`
 * `IN_FOLDER`: defaults to `/in`, where to scan for content
 * `OUT_FOLDER`: defaults to `/out`, where to put the PDFs
 * `KEEP_MOKURO_FILE`: defaults to 0, set to 1 to keep the `.mokuro` file generated.
+* `RECYCLE_BIN`: if set, will move sources to this this directory after conversion.
 
 ## Kubernetes cluster example
 

@@ -5,8 +5,10 @@ set -ex
 IN_FOLDER="${IN_FOLDER:-/in}"
 OUT_FOLDER="${OUT_FOLDER:-/out}"
 KEEP_MOKURO_FILE="${KEEP_MOKURO_FILE:-0}"
+RECYCLE_BIN="${RECYCLE_BIN:-}"
 export OUT_FOLDER
 export KEEP_MOKURO_FILE
+export RECYCLE_BIN
 
 function leaf_dir() {
   set -x
@@ -22,6 +24,9 @@ function leaf_dir() {
   HAS_RAW=$?
   if [ ${HAS_RAW} -eq 0 ] ; then
     raw_folder "${1}"
+    if [ -n "${RECYCLE_BIN}" ] ; then
+      mv "${1}" "${RECYCLE_BIN}"
+    fi
   else
     echo "${1} was not a RAW folder"
   fi
@@ -42,8 +47,11 @@ function raw_folder() {
     cd /app/mokuro2pdf # required for ttf
     ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${1}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "${OUT_FOLDER}" -n "${FOLDER}"
     rm -f "${PARENT_DIR}/${FOLDER}.html"
+    MOKURO_FILE="${PARENT_DIR}/${FOLDER}.mokuro"
     if [ ${KEEP_MOKURO_FILE} -eq 0 ] ; then
-      rm -f "${PARENT_DIR}/${FOLDER}.mokuro"
+      rm -f "${MOKURO_FILE}"
+    else
+      mv "${MOKURO_FILE}" "${OUT_FOLDER}/${FOLDER}.mokuro"
     fi
   fi
 }
@@ -62,6 +70,9 @@ function 7z_file() {
     7z x "${1}" "-o${UNZIPPED}"
     raw_folder "${UNZIPPED}"
     rm -fr "${UNZIPPED}"
+   fi
+   if [ -n "${RECYCLE_BIN}" ] ; then
+     mv "${1}" "${RECYCLE_BIN}"
    fi
 }
 export -f 7z_file
