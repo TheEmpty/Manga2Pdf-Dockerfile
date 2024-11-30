@@ -52,10 +52,24 @@ function raw_folder() {
 }
 export -f raw_folder
 
+function 7z_file() {
+  set -x
+  PARENT_DIR="$(dirname "${1}")"
+  FOLDER="$(basename "${1}")"
+  FOLDER="${FOLDER%.*}"
+  UNZIPPED="${PARENT_DIR}/${FOLDER}"
+  rm -fr "${UNZIPPED}"
+  7z x "${1}" "-o${UNZIPPED}"
+  raw_folder "${UNZIPPED}"
+}
+export -f 7z_file
+
 echo 'Scanning LEAF DIRECTORIES FIRST'
-find "${IN_FOLDER}" -type d -links 2 -exec bash -c "leaf_dir \"{}\"" \;
+# find "${IN_FOLDER}" -type d -links 2 -exec bash -c "leaf_dir \"{}\"" \;
 
 echo 'Scanning CBZ/ZIP files'
-find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\)$' -exec bash -c "cbz_file \"{}\"" \;
+# find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\)$' -exec bash -c "cbz_file \"{}\"" \;
 
-# TODO: CBR
+echo 'Scanning CBR/RAR/CB7 files'
+find "${IN_FOLDER}" -type f -regex '.+\.\(cbr\|rar\|7z\)$' -exec bash -c "7z_file \"{}\"" \;
+

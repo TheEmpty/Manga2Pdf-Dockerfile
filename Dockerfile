@@ -2,7 +2,7 @@ FROM ubuntu:latest
 # TODO: not use Ubuntu
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y ruby-full imagemagick git python3-full python3-pip libgl1 \
+    && apt-get install --no-install-recommends -y ruby-full imagemagick git python3-full python3-pip libgl1 7zip 7zip-rar \
     && apt-get clean \
     && rm -fr /var/lib/apt/lists/* \
     && gem install prawn mini_magick \
