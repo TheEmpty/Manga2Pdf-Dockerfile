@@ -1,4 +1,4 @@
-What is this?
+# What is this?
 
 A simple docker file and bash script that combines https://github.com/kha-white/mokuro and https://github.com/Kartoffel0/Mokuro2Pdf so I can be lazy and just point it at files without installing a bunch of things.
 
