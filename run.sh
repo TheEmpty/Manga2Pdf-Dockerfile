@@ -5,6 +5,7 @@ set -ex
 IN_FOLDER="${IN_FOLDER:-/in}"
 OUT_FOLDER="${OUT_FOLDER:-/out}"
 KEEP_MOKURO_FILE="${KEEP_MOKURO_FILE:-0}"
+export OUT_FOLDER
 export KEEP_MOKURO_FILE
 
 function leaf_dir() {
@@ -30,16 +31,20 @@ function leaf_dir() {
 export -f leaf_dir
 
 function raw_folder() {
-  echo "Processing ${1}"
-  /app/bin/mokuro "${1}" --disable_confirmation --legacy-html
-
-  cd /app/mokuro2pdf # required for ttf
   FOLDER="$(basename "${1}")"
   PARENT_DIR="$(dirname "${1}")"
-  ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${1}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "${OUT_FOLDER}"
-  rm -f "${PARENT_DIR}/${FOLDER}.html"
-  if [ ${KEEP_MOKURO_FILE} -eq 0 ] ; then
-    rm -f "${PARENT_DIR}/${FOLDER}.mokuro"
+  if [ -f "${OUT_FOLDER}/${FOLDER} - MKR2PDF.pdf" ]; then
+    echo "Skipping ${1}, PDF already exists"
+  else
+    echo "Processing ${1}"
+    /app/bin/mokuro "${1}" --disable_confirmation --legacy-html
+
+    cd /app/mokuro2pdf # required for ttf
+    ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${1}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "${OUT_FOLDER}" -n "${FOLDER}"
+    rm -f "${PARENT_DIR}/${FOLDER}.html"
+    if [ ${KEEP_MOKURO_FILE} -eq 0 ] ; then
+      rm -f "${PARENT_DIR}/${FOLDER}.mokuro"
+    fi
   fi
 }
 export -f raw_folder
@@ -50,10 +55,14 @@ function 7z_file() {
   FOLDER="$(basename "${1}")"
   FOLDER="${FOLDER%.*}"
   UNZIPPED="${PARENT_DIR}/${FOLDER}"
-  rm -fr "${UNZIPPED}"
-  7z x "${1}" "-o${UNZIPPED}"
-  raw_folder "${UNZIPPED}"
-  rm -fr "${UNZIPPED}"
+  if [ -f "${OUT_FOLDER}/${FOLDER} - MKR2PDF.pdf" ]; then
+    echo "Skipping ${1}, PDF already exists"
+  else
+    rm -fr "${UNZIPPED}"
+    7z x "${1}" "-o${UNZIPPED}"
+    raw_folder "${UNZIPPED}"
+    rm -fr "${UNZIPPED}"
+   fi
 }
 export -f 7z_file
 
