@@ -9,5 +9,7 @@ RUN apt-get update \
     && python3 -m venv /app && /app/bin/pip install mokuro \
     && git clone https://github.com/Kartoffel0/Mokuro2Pdf /app/mokuro2pdf
 
+ENV LANG=C.UTF-8
+
 COPY run.sh /run.sh
 ENTRYPOINT [ "/run.sh" ]

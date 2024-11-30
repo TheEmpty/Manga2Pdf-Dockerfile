@@ -14,30 +14,32 @@ function leaf_dir() {
     return 1
   fi
 
-  echo "Starting on ${1}"
-  ls "${1}" | grep -q '\.\(cbz\|zip\)$'
-  HAS_CBZ=$?
-  if [ ${HAS_CBZ} -eq 0 ] ; then
-    cbz_folder "${1}"
-  else
+  echo "Checking leaf for raws: ${1}"
+  ls "${1}" | grep -q '\.\(png\|jpg\|jpeg\|webp\|heif\|tiff\)$'
+  HAS_RAW=$?
+  if [ ${HAS_RAW} -eq 0 ] ; then
     raw_folder "${1}"
+  else
+    echo "${1} was not a RAW folder"
   fi
-  echo "Finshed on ${1}"
+  echo "Finshed RAW processing on ${1}"
   echo "+-+-+-+-+-+-+-+-+-+-+-+-+-+-+"
 }
 export -f leaf_dir
 
-function cbz_folder() {
+function cbz_file() {
+  set -x
+  /app/bin/mokuro "${1}" --disable_confirmation --unzip --legacy-html
+
   cd /app/mokuro2pdf # required for ttf
-  find "${1}" -type f -print0 | while IFS= read -r -d $'\0' FILE; do
-    /app/bin/mokuro "${FILE}" --disable_confirmation --unzip --legacy-html
-    PARENT_DIR="$(dirname "${1}")"
-    FOLDER="$(basename "${1}")"
-    FOLDER="${FOLDER%.*}"
-    ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${FILE}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "/out"
-  done
+  PARENT_DIR="$(dirname "${1}")"
+  FOLDER="$(basename "${1}")"
+  FOLDER="${FOLDER%.*}"
+  UNZIPPED="${PARENT_DIR}/${FOLDER}"
+  ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${UNZIPPED}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "/out"
+  rm -fr "${UNZIPPED}"
 }
-export -f cbz_folder
+export -f cbz_file
 
 function raw_folder() {
   echo "Processing RAW ${1}"
@@ -50,5 +52,10 @@ function raw_folder() {
 }
 export -f raw_folder
 
+echo 'Scanning LEAF DIRECTORIES FIRST'
 find "${IN_FOLDER}" -type d -links 2 -exec bash -c "leaf_dir \"{}\"" \;
 
+echo 'Scanning CBZ/ZIP files'
+find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\)$' -exec bash -c "cbz_file \"{}\"" \;
+
+# TODO: CBR
