@@ -8,6 +8,12 @@ Mount your raws in `/in` and the pdfs will go into `/out`
 
 `docker run --rm -v "~/Documents/my-raws:/in" -v "~/Documents/manga-pdfs:/out" -it theempty/manga2pdf`
 
+## Env variables
+
+* `IN_FOLDER`: defaults to `/in`, where to scan for content
+* `OUT_FOLDER`: defaults to `/out`, where to put the PDFs
+* `KEEP_MOKURO_FILE`: defaults to 0, set to 1 to keep the `.mokuro` file generated.
+
 ## Kubernetes cluster example
 
 Note since mokuro uses tqdm, you won't see useful logs while it's scanning.

@@ -2,8 +2,10 @@
 
 set -ex
 
-IN_FOLDER='/in'
-OUT_FOLDER='/out'
+IN_FOLDER="${IN_FOLDER:-/in}"
+OUT_FOLDER="${OUT_FOLDER:-/out}"
+KEEP_MOKURO_FILE="${KEEP_MOKURO_FILE:-0}"
+export KEEP_MOKURO_FILE
 
 function leaf_dir() {
   set -x
@@ -34,7 +36,11 @@ function raw_folder() {
   cd /app/mokuro2pdf # required for ttf
   FOLDER="$(basename "${1}")"
   PARENT_DIR="$(dirname "${1}")"
-  ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${1}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "/out"
+  ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${1}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "${OUT_FOLDER}"
+  rm -f "${PARENT_DIR}/${FOLDER}.html"
+  if [ ${KEEP_MOKURO_FILE} -eq 0 ] ; then
+    rm -f "${PARENT_DIR}/${FOLDER}.mokuro"
+  fi
 }
 export -f raw_folder
 
@@ -50,6 +56,10 @@ function 7z_file() {
   rm -fr "${UNZIPPED}"
 }
 export -f 7z_file
+
+mkdir -p $OUT_FOLDER
+touch ${OUT_FOLDER}/.test
+rm ${OUT_FOLDER}/.test
 
 echo 'Scanning Archive files'
 find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\|cbr\|rar\|7z\)$' -exec bash -c "7z_file \"{}\"" \;
