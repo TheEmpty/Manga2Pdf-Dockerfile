@@ -27,22 +27,8 @@ function leaf_dir() {
 }
 export -f leaf_dir
 
-function cbz_file() {
-  set -x
-  /app/bin/mokuro "${1}" --disable_confirmation --unzip --legacy-html
-
-  cd /app/mokuro2pdf # required for ttf
-  PARENT_DIR="$(dirname "${1}")"
-  FOLDER="$(basename "${1}")"
-  FOLDER="${FOLDER%.*}"
-  UNZIPPED="${PARENT_DIR}/${FOLDER}"
-  ruby /app/mokuro2pdf/Mokuro2Pdf.rb -u -i "${UNZIPPED}" -o "${PARENT_DIR}/_ocr/${FOLDER}" -w "/out"
-  rm -fr "${UNZIPPED}"
-}
-export -f cbz_file
-
 function raw_folder() {
-  echo "Processing RAW ${1}"
+  echo "Processing ${1}"
   /app/bin/mokuro "${1}" --disable_confirmation --legacy-html
 
   cd /app/mokuro2pdf # required for ttf
@@ -61,15 +47,13 @@ function 7z_file() {
   rm -fr "${UNZIPPED}"
   7z x "${1}" "-o${UNZIPPED}"
   raw_folder "${UNZIPPED}"
+  rm -fr "${UNZIPPED}"
 }
 export -f 7z_file
 
-echo 'Scanning LEAF DIRECTORIES FIRST'
-# find "${IN_FOLDER}" -type d -links 2 -exec bash -c "leaf_dir \"{}\"" \;
+echo 'Scanning Archive files'
+find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\|cbr\|rar\|7z\)$' -exec bash -c "7z_file \"{}\"" \;
 
-echo 'Scanning CBZ/ZIP files'
-# find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\)$' -exec bash -c "cbz_file \"{}\"" \;
-
-echo 'Scanning CBR/RAR/CB7 files'
-find "${IN_FOLDER}" -type f -regex '.+\.\(cbr\|rar\|7z\)$' -exec bash -c "7z_file \"{}\"" \;
+echo 'Scanning for RAWs'
+find "${IN_FOLDER}" -type d -links 2 -exec bash -c "leaf_dir \"{}\"" \;
 
