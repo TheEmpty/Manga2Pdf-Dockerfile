@@ -19,6 +19,8 @@ Mount your raws in `/in` and the pdfs will go into `/out`
 
 Note since mokuro uses tqdm, you won't see useful logs while it's scanning.
 
+### Single deployment
+
 ```
 apiVersion: v1
 kind: Pod
@@ -41,4 +43,42 @@ spec:
     nfs:
       server: mynas.local
       path: /mnt/media
+```
+
+### Cronjob
+
+```
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: manga2pdf
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: manga2pdf
+            image: theempty/manga2pdf
+            env:
+              - name: RECYCLE_BIN
+                value: /recycle
+            volumeMounts:
+              - name: media
+                mountPath: /in
+                subPath: books/convert/in
+              - name: media
+                mountPath: /out
+                subPath: books/convert/out
+              - name: media
+                mountPath: /recycle
+                subPath: books/convert/recycle
+          restartPolicy: OnFailure
+          volumes:
+          - name: media
+            nfs:
+              server: mynas.local
+              path: /mnt/media
 ```
