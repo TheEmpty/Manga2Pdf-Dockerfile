@@ -6,7 +6,7 @@ A simple docker file and bash script that combines https://github.com/kha-white/
 
 Mount your raws in `/in` and the pdfs will go into `/out`
 
-`docker run --rm -v "~/Documents/my-raws:/in" -v "~/Documents/manga-pdfs:/out" -it theempty/manga2pdf`
+`docker run --rm -v "~/Documents/my-raws:/in" -v "~/Documents/manga-pdfs:/out":z -it theempty/manga2pdf`
 
 ## Env variables
 
@@ -17,7 +17,7 @@ Mount your raws in `/in` and the pdfs will go into `/out`
 
 ## Kubernetes cluster example
 
-Note since mokuro uses tqdm, you won't see useful logs while it's scanning.
+Note since mokuro uses tqdm, you may not see useful logs while it's scanning.
 
 ### Single deployment
 
