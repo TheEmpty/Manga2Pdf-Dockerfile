@@ -2,6 +2,29 @@
 
 A simple docker file and bash script that combines https://github.com/kha-white/mokuro and https://github.com/Kartoffel0/Mokuro2Pdf so I can be lazy and just point it at files without installing a bunch of things.
 
+## Expected directory structure:
+
+### Raws
+Technical: any leaf node with pictures under `IN_FOLDER`.
+
+```
+in/
+ |- My Series
+   |- Vol 1
+     |- 001.jpg
+     |- 002.jpg
+     ...
+   |- Vol 2
+     |- 001.jpg
+     |- 002.jpg
+     ...
+   |- Specials
+     |- OVA Promo
+       |- 001.jpg
+       |- 002.jpg
+       ...
+```
+
 ## Docker example
 
 Mount your raws in `/in` and the pdfs will go into `/out`

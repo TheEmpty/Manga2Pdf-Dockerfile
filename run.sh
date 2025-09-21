@@ -85,5 +85,6 @@ echo 'Scanning Archive files'
 find "${IN_FOLDER}" -type f -regex '.+\.\(cbz\|zip\|cbr\|rar\|7z\)$' -exec bash -c "7z_file \"{}\"" \;
 
 echo 'Scanning for RAWs'
-find "${IN_FOLDER}" -type d -links 2 -exec bash -c "leaf_dir \"{}\"" \;
+# From: https://stackoverflow.com/a/61579420
+find "${IN_FOLDER}" -type d | sed 's:$:/:' | sort -r | while read -r dir;do [[ "${dir}" != "${prev:0:${#dir}}" ]] && leaf_dir "${dir}" && prev="${dir}"; done
 
